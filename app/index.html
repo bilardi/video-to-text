@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Real-time Transcribe PoC</h1>
+
+    <input type="file" id="videoFile" accept="video/*">
+    <br><br>
+    <video id="player" controls width="640" style="display:none"></video>
+    <br><br>
+    <button id="startBtn" onclick="startTranscription()" disabled>Start Transcription</button>
+
+    <div id="transcript" style="border:1px solid #ccc; padding:10px; margin-top:10px; min-height:100px; max-height:300px; overflow-y:auto"></div>
+
+    <script>
+        const fileInput = document.getElementById('videoFile');
+        const player = document.getElementById('player');
+        const startBtn = document.getElementById('startBtn');
+        let selectedFile = null;
+
+        fileInput.onchange = (e) => {
+            selectedFile = e.target.files[0];
+            player.src = URL.createObjectURL(selectedFile);
+            player.style.display = 'block';
+            startBtn.disabled = false;
+        };
+
+        async function startTranscription() {
+            if (!selectedFile) return;
+            startBtn.disabled = true;
+            document.getElementById('transcript').innerText = '';
+
+            // Step 1: upload file to get server-side path
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            const { path } = await res.json();
+
+            // Step 2: open WebSocket and send path for ffmpeg processing
+            const ws = new WebSocket("ws://localhost:8000/ws/transcribe/file");
+
+            ws.onopen = () => ws.send(path);
+
+            ws.onmessage = (event) => {
+                const div = document.getElementById('transcript');
+                div.innerText += event.data + ' ';
+                div.scrollTop = div.scrollHeight;
+            };
+
+            ws.onclose = () => { startBtn.disabled = false; };
+
+            player.play();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+FROM alpine:latest
+
+# Install ffmpeg and websocat
+RUN apk add --no-cache ffmpeg websocat
+
+# Wait for API to be ready, then stream audio via WebSocket
+CMD ["/bin/sh", "-c", "sleep 5 && ffmpeg -re -i ${VIDEO_FILE} -f s16le -acodec pcm_s16le -ar 16000 -ac 1 - | websocat --binary ws://api:8000/ws/transcribe"]

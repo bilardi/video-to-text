@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant int as index.html
+    participant local as local
+    participant api as Fast API
+    participant ffmpeg as ffmpeg
+    participant aws as Transcribe
+    
+    api-->>int: Serves index.html by GET method "/"<br>http://0.0.0.0:8000
+    int->>local: Choose local video file<br>by "Browse..."
+    local-->>int: Loading local file
+    int->>api: Click on "Start Transcription"
+    rect rgb(240, 240, 240)
+        Note over api: Start Transcription by index.html
+        int-->>api: Upload video by POST method "/upload"
+        api->>ffmpeg: Extracts PCM audio<br>from webm/mp4 raw
+        ffmpeg-->>api: Receives PCM audio
+        api->>aws: Sends PCM audio chunks to Amazon Transcribe
+        aws-->>api: Receives transcript chunks
+        api-->>int: Send transcription by WS<br>"/ws/transcribe/file"
+    end
+
+    Note over ffmpeg: Uncomment ffmpeg service<br>in docker-compose.yaml
+    rect rgb(240, 240, 240)
+        ffmpeg->>api: Upload video by WS<br>"/ws/transcribe"
+        api->>aws: Sends PCM audio chunks to Amazon Transcribe
+        aws-->>api: Receives transcript chunks
+        api-->>api: Send transcription on api container logs
+    end

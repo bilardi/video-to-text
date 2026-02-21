@@ -1,0 +1,4 @@
+amazon-transcribe
+fastapi
+python-multipart
+uvicorn[standard]

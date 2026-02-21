@@ -1,0 +1,19 @@
+FROM python:3.13
+
+# Set the working directory
+WORKDIR /code
+
+# Install ffmpeg system dependency
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install dependencies
+COPY ./app/requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+# Copy the application code
+COPY ./app /code/app
+
+# Use uvicorn to run the application
+# --host 0.0.0.0 is required to accept connections from outside the container
+# --port 8000 is our standard port
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

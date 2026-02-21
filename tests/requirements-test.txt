@@ -1,0 +1,7 @@
+bump-my-version
+git-cliff
+pytest
+pytest-asyncio
+httpx
+black
+pylint
