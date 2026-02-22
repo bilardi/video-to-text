@@ -52,8 +52,4 @@ ignore = ["tests"]
 max-line-length = 100
 
 [tool.pylint.messages_control]
-disable = [
-#    "missing-module-docstring",
-#    "missing-class-docstring",
-#    "missing-function-docstring",
-]
+disable = []

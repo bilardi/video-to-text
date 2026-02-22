@@ -6,10 +6,10 @@ from httpx import AsyncClient, ASGITransport
 from starlette.testclient import TestClient
 from app.main import app
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 async def _mock_start_transcription(audio_generator, callback):
     """Drain the audio generator and fire a single fake transcript callback."""
@@ -22,6 +22,7 @@ async def _mock_start_transcription(audio_generator, callback):
 # GET /
 # ---------------------------------------------------------------------------
 
+
 class TestGetIndex:
     @pytest.mark.asyncio
     async def test_returns_html(self, tmp_path):
@@ -30,6 +31,7 @@ class TestGetIndex:
         html_file.write_text(fake_html)
 
         import builtins
+
         real_open = builtins.open
 
         def fake_open(path, mode="r", *args, **kwargs):
@@ -38,7 +40,9 @@ class TestGetIndex:
             return real_open(path, mode, *args, **kwargs)
 
         with patch("builtins.open", fake_open):
-            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as client:
                 response = await client.get("/")
 
         assert response.status_code == 200
@@ -50,10 +54,12 @@ class TestGetIndex:
 # POST /upload
 # ---------------------------------------------------------------------------
 
+
 class TestUploadVideo:
     @pytest.mark.asyncio
     async def test_upload_saves_file_and_returns_path(self, tmp_path):
         import builtins
+
         real_open = builtins.open
 
         def fake_open(path, mode="r", *args, **kwargs):
@@ -62,7 +68,9 @@ class TestUploadVideo:
             return real_open(path, mode, *args, **kwargs)
 
         with patch("builtins.open", fake_open):
-            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as client:
                 response = await client.post(
                     "/upload",
                     files={"file": ("video.mp4", b"fake-video-bytes", "video/mp4")},
@@ -74,6 +82,7 @@ class TestUploadVideo:
     @pytest.mark.asyncio
     async def test_upload_returns_correct_filename(self, tmp_path):
         import builtins
+
         real_open = builtins.open
 
         def fake_open(path, mode="r", *args, **kwargs):
@@ -82,7 +91,9 @@ class TestUploadVideo:
             return real_open(path, mode, *args, **kwargs)
 
         with patch("builtins.open", fake_open):
-            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as client:
                 response = await client.post(
                     "/upload",
                     files={"file": ("my_video.mp4", b"data", "video/mp4")},
@@ -95,9 +106,12 @@ class TestUploadVideo:
 # WS /ws/transcribe  (raw PCM binary streaming)
 # ---------------------------------------------------------------------------
 
+
 class TestWsTranscribe:
     def test_receives_transcript_text(self):
-        with patch("app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription):
+        with patch(
+            "app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription
+        ):
             with TestClient(app) as client:
                 with client.websocket_connect("/ws/transcribe") as ws:
                     ws.send_bytes(b"\x00\x01" * 1024)
@@ -106,7 +120,9 @@ class TestWsTranscribe:
                     assert msg == "test transcript"
 
     def test_server_does_not_crash_on_empty_chunks(self):
-        with patch("app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription):
+        with patch(
+            "app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription
+        ):
             with TestClient(app) as client:
                 with client.websocket_connect("/ws/transcribe") as ws:
                     ws.send_bytes(b"")
@@ -117,6 +133,7 @@ class TestWsTranscribe:
 # WS /ws/transcribe/file  (server-side ffmpeg conversion)
 # ---------------------------------------------------------------------------
 
+
 class TestWsTranscribeFile:
     def test_receives_transcript_for_valid_path(self, tmp_path):
         video = tmp_path / "test.mp4"
@@ -125,8 +142,13 @@ class TestWsTranscribeFile:
         mock_proc = MagicMock()
         mock_proc.stdout.read = AsyncMock(side_effect=[b"\x00\x01" * 512, b""])
 
-        with patch("asyncio.create_subprocess_exec", return_value=mock_proc), \
-             patch("app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription):
+        with (
+            patch("asyncio.create_subprocess_exec", return_value=mock_proc),
+            patch(
+                "app.main.transcribe_service.start_transcription",
+                side_effect=_mock_start_transcription,
+            ),
+        ):
             with TestClient(app) as client:
                 with client.websocket_connect("/ws/transcribe/file") as ws:
                     ws.send_text(str(video))
@@ -140,8 +162,13 @@ class TestWsTranscribeFile:
         mock_proc = MagicMock()
         mock_proc.stdout.read = AsyncMock(side_effect=[b"", b""])
 
-        with patch("asyncio.create_subprocess_exec", return_value=mock_proc) as mock_exec, \
-             patch("app.main.transcribe_service.start_transcription", side_effect=_mock_start_transcription):
+        with (
+            patch("asyncio.create_subprocess_exec", return_value=mock_proc) as mock_exec,
+            patch(
+                "app.main.transcribe_service.start_transcription",
+                side_effect=_mock_start_transcription,
+            ),
+        ):
             with TestClient(app) as client:
                 with client.websocket_connect("/ws/transcribe/file") as ws:
                     ws.send_text(str(video))

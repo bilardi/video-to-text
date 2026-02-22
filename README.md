@@ -145,7 +145,9 @@ docker-compose down; docker-compose up --build
 
 This streams the video directly to the `WS /ws/transcribe` endpoint. Transcription output appears in the `api` container logs.
 
-## Example
+## Examples
+
+### Download video
 
 ```sh
 ## Download opening video of PyCon IT 2025 ##
@@ -153,7 +155,11 @@ This streams the video directly to the `WS /ws/transcribe` endpoint. Transcripti
 yt-dlp -F https://www.youtube.com/watch?v=Xe0uFpnaNEc
 # Best audio ID 234, small video ID 269
 yt-dlp -f 269+234 --merge-output-format mp4 -o "tests/Xe0uFpnaNEc.269.234.mp4" https://www.youtube.com/watch?v=Xe0uFpnaNEc
+```
 
+### GUI test
+
+```sh
 ## Configure environment variables ##
 # Set environment variables
 export AWS_PROFILE=mine
@@ -167,6 +173,7 @@ AWS_REGION=$AWS_REGION
 COMPOSE_PROFILES=$COMPOSE_PROFILES
 EOF
 
+## GUI test
 # Build and start
 docker-compose down; docker-compose up --build
 
@@ -175,6 +182,29 @@ docker-compose down; docker-compose up --build
 # Click Start Transcription
 ```
 
-### Result
+![gui-test](./docs/images/gui-test.png "GUI test")
 
-![example](./docs/images/example.png "Example")
+### CLI test
+
+```sh
+## Configure environment variables ##
+# Set environment variables
+export AWS_PROFILE=mine
+export AWS_REGION=eu-west-1
+export COMPOSE_PROFILES=ffmpeg
+export VIDEO_FILE=/tmp/tests/Xe0uFpnaNEc.269.234.mp4
+
+# Write .env for docker-compose
+cat << EOF > .env
+AWS_PROFILE=$AWS_PROFILE
+AWS_REGION=$AWS_REGION
+COMPOSE_PROFILES=$COMPOSE_PROFILES
+VIDEO_FILE=$VIDEO_FILE
+EOF
+
+## CLI test
+# Build and start
+docker-compose down; docker-compose up --build
+```
+
+![cli-test](./docs/images/cli-test.png "CLI test")

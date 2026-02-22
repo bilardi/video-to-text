@@ -1,21 +1,24 @@
+"""FastAPI application exposing the transcription endpoints and the single-page UI."""
+
+import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.responses import HTMLResponse
 from .transcribe_service import TranscribeService
-import asyncio
-import subprocess
 
 app = FastAPI()
 transcribe_service = TranscribeService()
 
 
 @app.get("/")
-async def get_index():
-    with open("/code/app/index.html") as f:
+async def get_index() -> HTMLResponse:
+    """Serve the index.html single-page UI."""
+    with open("/code/app/index.html", encoding="utf-8") as f:
         return HTMLResponse(f.read())
 
 
 @app.post("/upload")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_video(file: UploadFile = File(...)) -> dict:
+    """Save the uploaded video file to /tmp and return its server-side path."""
     # Save uploaded file to a temp path
     tmp_path = f"/tmp/{file.filename}"
     with open(tmp_path, "wb") as f:
@@ -24,7 +27,8 @@ async def upload_video(file: UploadFile = File(...)):
 
 
 @app.websocket("/ws/transcribe")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket) -> None:
+    """Accept raw PCM binary chunks over WebSocket and stream them to Amazon Transcribe."""
     await websocket.accept()
     print("New streaming connection established", flush=True)
 
@@ -50,7 +54,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
             yield chunk
 
-    async def send_to_client(text):
+    async def send_to_client(text: str):
         # Print transcription in real-time to the console
         print(f"AWS Transcribe: {text}", flush=True)
         # Send back to the client via WebSocket
@@ -67,7 +71,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 @app.websocket("/ws/transcribe/file")
-async def websocket_transcribe_file(websocket: WebSocket):
+async def websocket_transcribe_file(websocket: WebSocket) -> None:
+    """Accept a server-side file path over WebSocket, convert it to PCM via ffmpeg,
+    and stream it to Amazon Transcribe."""
     await websocket.accept()
     print("New file transcription connection", flush=True)
 
@@ -110,7 +116,7 @@ async def websocket_transcribe_file(websocket: WebSocket):
                 break
             yield chunk
 
-    async def send_to_client(text):
+    async def send_to_client(text: str):
         print(f"AWS Transcribe: {text}", flush=True)
         await websocket.send_text(text)
 
