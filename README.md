@@ -90,10 +90,12 @@ Versioning management
 bump-my-version bump minor # minor, major, patch
 # generate changelog from commits
 git-cliff --output CHANGELOG.md
+sed -i 's/<!-- [0-9]* -->//g' CHANGELOG.md
 git add CHANGELOG.md
 # adds CHANGELOG to the bump commit
 git commit --amend --no-edit
-git push && git push --tags
+git tag -f v$(python -c "from app import __version__; print(__version__)")
+git push && git push --tags --force
 ```
 
 ## Usage
