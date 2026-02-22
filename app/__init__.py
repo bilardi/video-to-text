@@ -6,4 +6,4 @@ Video-to-text app built with FastAPI, exposing
 and return real-time transcriptions.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
