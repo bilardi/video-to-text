@@ -86,16 +86,10 @@ uv run pylint app/
 Versioning management
 
 ```sh
-# auto-commits and tags the new version
-bump-my-version bump minor # minor, major, patch
-# generate changelog from commits
-git-cliff --output CHANGELOG.md
-sed -i 's/<!-- [0-9]* -->//g' CHANGELOG.md
-git add CHANGELOG.md
-# adds CHANGELOG to the bump commit
-git commit --amend --no-edit
-git tag -f v$(python -c "from app import __version__; print(__version__)")
-git push && git push --tags --force
+# use one of the following commands according to the guide https://semver.org/
+make patch
+make minor
+make major
 ```
 
 ## Usage
