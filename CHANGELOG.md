@@ -1,4 +1,8 @@
 # Changelog
+## [0.1.4] - 2026-02-22
+### ⚡ Performance
+- Added Makefile
+
 ## [0.1.3] - 2026-02-22
 ### 📚 Documentation
 - Updated diagram
