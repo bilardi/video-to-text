@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### 📚 Documentation
+- Added CHANGELOG.md
+
 ### ⚡ Performance
 - Updated versioning management
 

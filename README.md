@@ -91,6 +91,13 @@ Conventional Commits
 git commit -m "feat: first version"
 ```
 
+Updating CHANGELOG.md
+
+```sh
+# it also adds the file in the commit
+make changelog
+```
+
 Versioning management
 
 ```sh
