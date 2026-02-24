@@ -1,8 +1,8 @@
 sequenceDiagram
     participant int as index.html
     participant local as local
-    participant api as Fast API
     participant ffmpeg as ffmpeg
+    participant api as Fast API
     participant aws as Transcribe
     
     api-->>int: Serves index.html by GET method "/"<br>http://0.0.0.0:8000

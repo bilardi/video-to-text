@@ -83,6 +83,14 @@ uv run black app/ tests/
 uv run pylint app/
 ```
 
+Conventional Commits
+
+```sh
+# use one of the <type> before your message,
+# according to the guide https://www.conventionalcommits.org/en/v1.0.0-beta.2/
+git commit -m "feat: first version"
+```
+
 Versioning management
 
 ```sh
